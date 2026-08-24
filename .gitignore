@@ -3,5 +3,4 @@ __pycache__/
 *.pyc
 .env
 *.pkl
-artifacts/*.txt
 .ipynb_checkpoints/
