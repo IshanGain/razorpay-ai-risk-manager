@@ -1,0 +1,1 @@
+{"timestamp": "2026-08-25T09:00:18.728161", "audit_id": "35535090-344", "transaction_id": "order_TTwcmGyJ2hWTFv", "decision": "STEP_UP_2FA", "p_fraud": 0.3443, "reasons": ["HIGH_C14", "LOW_CARD1_MEAN_AMT", "HIGH_C13"], "amount": 250.0, "merchant_id": "merchant_123", "model_version": "lgbm-v1.0", "latency_ms": 27.51, "path": "ML_MODEL"}
