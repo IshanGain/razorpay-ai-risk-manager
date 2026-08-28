@@ -2,6 +2,13 @@
 Razorpay AI Risk Manager - Ops Dashboard
 Real-time fraud monitoring and transaction scoring
 """
+import sys
+import os
+
+# Add the project root to the Python path so it can find the 'batch' module
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from batch.scorer import score_batch_csv, validate_csv, generate_sample_csv
 
 import streamlit as st
 import requests
@@ -15,7 +22,7 @@ import time
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Razorpay AI Risk Manager",
-    page_icon="🛡️",
+    page_icon="https://razorpay.com/favicon.ico",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -25,23 +32,58 @@ API_BASE = "http://127.0.0.1:8000"
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    .main { background-color: #0a0c10; }
-    .metric-card {
-        background: #111318;
-        border: 1px solid #1e2430;
-        border-radius: 10px;
-        padding: 20px;
-        text-align: center;
+    /* Razorpay brand colors: Deep midnight backgrounds, vibrant blue accents */
+    [data-testid="stAppViewContainer"] {
+        background-color: #0b1121; 
     }
-    .approve  { border-left: 4px solid #22c55e; }
-    .stepup   { border-left: 4px solid #eab308; }
-    .decline  { border-left: 4px solid #ef4444; }
+    [data-testid="stSidebar"] {
+        background-color: #121a2f; 
+    }
+    
+    /* Buttons */
     .stButton > button {
-        background: #3d7fff;
-        color: white;
+        background-color: #338cf0 !important; /* Razorpay primary blue */
+        color: #ffffff !important;
         border: none;
-        border-radius: 6px;
-        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .stButton > button:hover {
+        background-color: #1d72d6 !important;
+        box-shadow: 0 4px 12px rgba(51, 140, 240, 0.3);
+    }
+    
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        color: #ffffff;
+        font-weight: 700;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 24px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #94a3b8;
+        font-weight: 500;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #ffffff !important;
+    }
+    .stTabs [aria-selected="true"]::after {
+        background-color: #338cf0 !important;
+    }
+    
+    /* Download Buttons */
+    .stDownloadButton > button {
+        background-color: transparent !important;
+        border: 1px solid #338cf0 !important;
+        color: #338cf0 !important;
+    }
+    .stDownloadButton > button:hover {
+        background-color: rgba(51, 140, 240, 0.1) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -97,7 +139,7 @@ with st.sidebar:
     health = get_health()
     if health:
         st.success("API Online")
-        rzp_status = "✅ Connected" if health.get("razorpay_connected") else "⚠️ Disconnected"
+        rzp_status = "Connected" if health.get("razorpay_connected") else "Disconnected"
         st.caption(f"Razorpay: {rzp_status}")
         st.caption(f"Model: {health.get('model_ver', 'unknown')}")
     else:
@@ -118,17 +160,18 @@ with st.sidebar:
         st.caption(f"DECLINE >= {t.get('decline', 'N/A')}")
 
 # ── Main header ───────────────────────────────────────────────────────────────
-st.title("🛡️ Razorpay AI Risk Manager")
+st.title("Razorpay AI Risk Manager")
 st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')} | "
            f"Track 02 — AI Buildathon 2026")
 st.divider()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📊 Live Dashboard",
-    "🔍 Score Transaction",
-    "📋 Audit History",
-    "ℹ️ Model Info"
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Live Dashboard",
+    "Score Transaction",
+    "Audit History",
+    "Model Info",
+    "Batch Scorer"
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -177,7 +220,7 @@ with tab1:
                 labels=["Approve", "Step-Up 2FA", "Decline"],
                 values=[approve, step_up, decline],
                 hole=0.5,
-                marker_colors=["#22c55e", "#eab308", "#ef4444"],
+                marker_colors=["#10b981", "#f59e0b", "#ef4444"],
             )])
             fig.update_layout(
                 paper_bgcolor="rgba(0,0,0,0)",
@@ -187,7 +230,7 @@ with tab1:
                 margin=dict(t=20, b=20, l=20, r=20),
                 height=280,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
         else:
             st.info("No decisions yet — score some transactions first")
 
@@ -200,10 +243,10 @@ with tab1:
             title={"text": "Avg P(Fraud)", "font": {"color": "white"}},
             gauge={
                 "axis": {"range": [0, 1], "tickcolor": "white"},
-                "bar": {"color": "#3d7fff"},
+                "bar": {"color": "#ffffff", "thickness": 0.2},
                 "steps": [
-                    {"range": [0, 0.10], "color": "#22c55e"},
-                    {"range": [0.10, 0.35], "color": "#eab308"},
+                    {"range": [0, 0.10], "color": "#10b981"},
+                    {"range": [0.10, 0.35], "color": "#f59e0b"},
                     {"range": [0.35, 1.0], "color": "#ef4444"},
                 ],
                 "threshold": {
@@ -218,10 +261,10 @@ with tab1:
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",
             font_color="white",
-            height=280,
-            margin=dict(t=20, b=20, l=40, r=40),
+            height=320,
+            margin=dict(t=60, b=20, l=40, r=40),
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     # ── Row 3: Recent decisions ─────────────────────────────
     st.subheader("Recent Decisions")
@@ -231,10 +274,9 @@ with tab1:
         rows = []
         for r in history:
             decision = r.get("decision", "")
-            emoji = {"APPROVE": "✅", "STEP_UP_2FA": "⚡", "DECLINE": "❌"}.get(decision, "")
             rows.append({
                 "Time": r.get("timestamp", "")[:19].replace("T", " "),
-                "Decision": f"{emoji} {decision}",
+                "Decision": decision,
                 "P(Fraud)": f"{r.get('p_fraud', 0):.4f}",
                 "Amount": f"₹{r.get('amount', 0):,.0f}",
                 "Reasons": ", ".join(r.get("reasons", [])[:2]),
@@ -242,7 +284,7 @@ with tab1:
                 "Latency": f"{r.get('latency_ms', 0):.1f}ms",
             })
         df = pd.DataFrame(rows)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
     else:
         st.info("No decisions logged yet")
 
@@ -290,7 +332,7 @@ with tab2:
 
         create_rzp = st.checkbox("Create Razorpay order first", value=True)
 
-        score_btn = st.button("🔍 Score Transaction", use_container_width=True)
+        score_btn = st.button("Score Transaction", use_container_width=True)
 
     with col_result:
         st.caption("Result")
@@ -336,14 +378,12 @@ with tab2:
                 latency  = result.get("latency_ms", 0)
 
                 # Decision badge
-                color = {"APPROVE": "green",
-                         "STEP_UP_2FA": "orange",
-                         "DECLINE": "red"}.get(decision, "blue")
-                emoji = {"APPROVE": "✅",
-                         "STEP_UP_2FA": "⚡",
-                         "DECLINE": "❌"}.get(decision, "")
+                color = {"APPROVE": "#10b981",
+                         "STEP_UP_2FA": "#f59e0b",
+                         "DECLINE": "#ef4444"}.get(decision, "#338cf0")
+                
                 st.markdown(
-                    f"<h2 style='color:{color}'>{emoji} {decision}</h2>",
+                    f"<h2 style='color:{color}; font-weight: bold;'>{decision}</h2>",
                     unsafe_allow_html=True
                 )
 
@@ -387,13 +427,10 @@ with tab3:
         rows = []
         for r in history:
             decision = r.get("decision", "")
-            emoji = {"APPROVE": "✅",
-                     "STEP_UP_2FA": "⚡",
-                     "DECLINE": "❌"}.get(decision, "")
             rows.append({
                 "Timestamp": r.get("timestamp", "")[:19].replace("T", " "),
                 "Txn ID": r.get("transaction_id", "")[:12],
-                "Decision": f"{emoji} {decision}",
+                "Decision": decision,
                 "P(Fraud)": round(r.get("p_fraud", 0), 4),
                 "Amount": f"₹{r.get('amount', 0):,.0f}",
                 "Merchant": r.get("merchant_id", "N/A"),
@@ -403,12 +440,12 @@ with tab3:
             })
 
         df = pd.DataFrame(rows)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
 
         # Download
         csv = df.to_csv(index=False)
         st.download_button(
-            label="⬇️ Download CSV",
+            label="Download CSV",
             data=csv,
             file_name=f"audit_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv"
@@ -461,3 +498,142 @@ with tab4:
             """)
     else:
         st.error("API offline — cannot load model info")
+
+# ════════════════════════════════════════════════════════════
+# TAB 5 — BATCH CSV SCORER
+# ════════════════════════════════════════════════════════════
+with tab5:
+    st.subheader("Batch CSV Scorer")
+    st.caption("Upload a CSV of transactions and get fraud scores + SHAP reasons per row")
+
+    # Sample download
+    col_dl, col_info = st.columns([1, 3])
+    with col_dl:
+        sample_csv = generate_sample_csv()
+        st.download_button(
+            label="Download Sample CSV",
+            data=sample_csv,
+            file_name="sample_transactions.csv",
+            mime="text/csv",
+            help="Download a sample CSV to see the expected format"
+        )
+    with col_info:
+        st.info("Required column: `TransactionAmt`. "
+                "All other columns are optional with sensible defaults.")
+
+    st.divider()
+
+    # File upload
+    uploaded_file = st.file_uploader(
+        "Upload transaction CSV",
+        type=["csv"],
+        help="CSV with transaction data. Download sample above for format."
+    )
+
+    if uploaded_file:
+        df_input = pd.read_csv(uploaded_file)
+
+        # Validate
+        valid, msg = validate_csv(df_input)
+        if not valid:
+            st.error(f"Invalid CSV: {msg}")
+        else:
+            st.success(f"CSV loaded: {len(df_input)} transactions")
+
+            # Preview
+            with st.expander("Preview input data"):
+                st.dataframe(df_input.head(5), width="stretch")
+
+            # Score button
+            if st.button("Score All Transactions", use_container_width=True):
+                progress_bar = st.progress(0)
+                status_text  = st.empty()
+
+                def update_progress(pct):
+                    progress_bar.progress(pct)
+                    status_text.caption(
+                        f"Scoring... {int(pct * len(df_input))}/{len(df_input)}")
+
+                with st.spinner("Scoring transactions..."):
+                    result_df = score_batch_csv(df_input, update_progress)
+
+                progress_bar.progress(1.0)
+                status_text.caption("Done!")
+
+                # Summary metrics
+                st.divider()
+                total_b   = len(result_df)
+                approve_b = (result_df["decision"] == "APPROVE").sum()
+                stepup_b  = (result_df["decision"] == "STEP_UP_2FA").sum()
+                decline_b = (result_df["decision"] == "DECLINE").sum()
+                errors_b  = (result_df["decision"] == "ERROR").sum()
+                avg_p     = result_df["p_fraud"].mean()
+
+                c1, c2, c3, c4, c5 = st.columns(5)
+                c1.metric("Total", total_b)
+                c2.metric("Approved",    approve_b,
+                          f"{approve_b/total_b:.1%}")
+                c3.metric("Step-Up 2FA", stepup_b,
+                          f"{stepup_b/total_b:.1%}")
+                c4.metric("Declined",    decline_b,
+                          f"{decline_b/total_b:.1%}")
+                c5.metric("Avg P(Fraud)", f"{avg_p:.4f}")
+
+                # Results table
+                st.divider()
+                st.subheader("Results")
+
+                # Color-code decisions
+                def color_decision(val):
+                    color = {
+                        "APPROVE":     "color: #10b981; font-weight: 600;",
+                        "STEP_UP_2FA": "color: #f59e0b; font-weight: 600;",
+                        "DECLINE":     "color: #ef4444; font-weight: 600;",
+                        "ERROR":       "color: #94a3b8; font-weight: 600;",
+                    }.get(val, "")
+                    return color
+
+                display_cols = (
+                    ["TransactionAmt"] +
+                    [c for c in ["merchant_id","card1","hour_of_day",
+                                 "is_cold_start"] if c in result_df.columns] +
+                    ["p_fraud","decision","reason_1","reason_2",
+                     "reason_3","path","latency_ms"]
+                )
+                display_df = result_df[
+                    [c for c in display_cols if c in result_df.columns]
+                ]
+
+                styled = display_df.style.map(
+                    color_decision, subset=["decision"]
+                )
+                st.dataframe(styled, width="stretch", hide_index=True)
+
+                # Download results
+                st.divider()
+                csv_out = result_df.to_csv(index=False)
+                st.download_button(
+                    label="Download Scored Results CSV",
+                    data=csv_out,
+                    file_name=f"scored_results_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
+
+                # Fraud breakdown chart
+                if total_b > 0:
+                    st.divider()
+                    st.subheader("Decision Distribution")
+                    fig = go.Figure(data=[go.Bar(
+                        x=["Approve", "Step-Up 2FA", "Decline"],
+                        y=[approve_b, stepup_b, decline_b],
+                        marker_color=["#10b981", "#f59e0b", "#ef4444"],
+                    )])
+                    fig.update_layout(
+                        paper_bgcolor="rgba(0,0,0,0)",
+                        plot_bgcolor="rgba(0,0,0,0)",
+                        font_color="white",
+                        height=300,
+                        margin=dict(t=20, b=20, l=20, r=20),
+                        yaxis=dict(gridcolor="#1e2430"),
+                    )
+                    st.plotly_chart(fig, width="stretch")
