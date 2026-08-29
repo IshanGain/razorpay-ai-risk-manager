@@ -9,6 +9,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from batch.scorer import score_batch_csv, validate_csv, generate_sample_csv
+from mlops.drift import get_drift_summary, check_score_drift
 
 import streamlit as st
 import requests
@@ -166,12 +167,13 @@ st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')} | "
 st.divider()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "Live Dashboard",
     "Score Transaction",
     "Audit History",
     "Model Info",
-    "Batch Scorer"
+    "Batch Scorer",
+    "Drift Monitor"
 ])
 
 # ════════════════════════════════════════════════════════════
@@ -637,3 +639,203 @@ with tab5:
                         yaxis=dict(gridcolor="#1e2430"),
                     )
                     st.plotly_chart(fig, width="stretch")
+
+# ════════════════════════════════════════════════════════════
+# TAB 6 — DRIFT MONITOR
+# ════════════════════════════════════════════════════════════
+with tab6:
+    st.subheader("Model Drift Monitor")
+    st.caption("PSI and KL divergence monitoring — auto-triggers retrain alert when PSI > 0.2")
+
+    # ── Drift summary ─────────────────────────────────────────
+    col_refresh, col_window = st.columns([1, 2])
+    with col_refresh:
+        run_drift = st.button(" Run Drift Check", use_container_width=True)
+    with col_window:
+        st.caption("Compares last 24h scores against last 7 days as reference baseline")
+
+    st.divider()
+
+    if run_drift:
+        with st.spinner("Computing PSI and KL divergence..."):
+            summary = get_drift_summary()
+
+        # ── Status banner ──────────────────────────────────────
+        status = summary.get("status", "UNKNOWN")
+
+        if status == "STABLE":
+            st.success(f" Model is STABLE — No retraining needed")
+        elif status == "MONITOR":
+            st.warning(f" Model is MONITOR — Moderate drift detected, keep watching")
+        elif status == "DRIFT_DETECTED":
+            st.error(f" Model is DRIFT DETECTED — Retraining recommended")
+        else:
+            st.info(f"ℹ️ {summary.get('message', 'Insufficient data for drift analysis')}")
+
+        st.divider()
+
+        if status not in ["INSUFFICIENT_DATA", "UNKNOWN"]:
+            # ── Key metrics ────────────────────────────────────
+            c1, c2, c3, c4 = st.columns(4)
+
+            psi = summary.get("psi", 0)
+            kl  = summary.get("kl_divergence", 0)
+
+            with c1:
+                psi_color = (
+                    "normal" if psi < 0.1 else
+                    "off"    if psi < 0.2 else
+                    "inverse"
+                )
+                st.metric(
+                    "PSI Score",
+                    f"{psi:.4f}",
+                    delta=(
+                        "Stable" if psi < 0.1 else
+                        "Monitor" if psi < 0.2 else
+                        "Retrain!"
+                    ),
+                    delta_color=psi_color,
+                    help="Population Stability Index. < 0.1 stable, 0.1-0.2 monitor, > 0.2 retrain"
+                )
+            with c2:
+                st.metric(
+                    "KL Divergence",
+                    f"{kl:.4f}",
+                    help="KL divergence between reference and current distributions"
+                )
+            with c3:
+                st.metric(
+                    "Recent Scores",
+                    summary.get("recent_count", 0),
+                    help="Number of scores in last 24h window"
+                )
+            with c4:
+                st.metric(
+                    "Reference Scores",
+                    summary.get("reference_count", 0),
+                    help="Number of scores in 7-day reference window"
+                )
+
+            st.divider()
+
+            # ── Score distribution comparison ──────────────────
+            col_l, col_r = st.columns(2)
+
+            with col_l:
+                st.subheader("PSI Interpretation")
+                psi_data = {
+                    "Range":        ["< 0.1", "0.1 – 0.2", "> 0.2"],
+                    "Status":       [" Stable", " Monitor", " Retrain"],
+                    "Action":       ["None", "Keep watching", "Trigger retraining"],
+                    "Your PSI":     [
+                        f"{psi:.4f}" if psi < 0.1 else "",
+                        f"{psi:.4f}" if 0.1 <= psi < 0.2 else "",
+                        f"{psi:.4f}" if psi >= 0.2 else "",
+                    ]
+                }
+                st.dataframe(
+                    pd.DataFrame(psi_data),
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            with col_r:
+                st.subheader("Score Means")
+                means_fig = go.Figure(data=[go.Bar(
+                    x=["Reference (7d)", "Recent (24h)"],
+                    y=[
+                        summary.get("reference_mean", 0),
+                        summary.get("recent_mean", 0)
+                    ],
+                    marker_color=["#3d7fff", "#ef4444"],
+                    text=[
+                        f"{summary.get('reference_mean', 0):.4f}",
+                        f"{summary.get('recent_mean', 0):.4f}"
+                    ],
+                    textposition="auto",
+                )])
+                means_fig.update_layout(
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    font_color="white",
+                    height=250,
+                    margin=dict(t=20, b=20, l=20, r=20),
+                    yaxis=dict(
+                        gridcolor="#1e2430",
+                        title="Avg P(Fraud)"
+                    ),
+                )
+                st.plotly_chart(means_fig, use_container_width=True)
+
+            st.divider()
+
+            # ── Retrain button ─────────────────────────────────
+            st.subheader("Retraining")
+
+            if summary.get("retrain_recommended"):
+                st.error(
+                    " Retraining is recommended. "
+                    "PSI has exceeded the 0.2 threshold."
+                )
+                if st.button(" Trigger Retraining",
+                             type="primary",
+                             use_container_width=True):
+                    st.info(
+                        "In production this would trigger the retraining "
+                        "pipeline with the latest labeled data from ClickHouse. "
+                        "For this demo, re-run the Kaggle training notebook "
+                        "and replace the artifacts."
+                    )
+                    st.code(
+                        "# Production retraining command\n"
+                        "python models/trainer.py --retrain --data latest",
+                        language="bash"
+                    )
+            else:
+                st.success(
+                    " No retraining needed. "
+                    "Model is stable — PSI is within acceptable range."
+                )
+
+            # ── Last checked ───────────────────────────────────
+            st.divider()
+            st.caption(
+                f"Last checked: {summary.get('checked_at', 'N/A')} | "
+                f"PSI threshold: {summary.get('psi_threshold', 0.2)}"
+            )
+
+        else:
+            # Not enough data
+            st.info(
+                f"Not enough data yet for drift analysis. "
+                f"Need at least 10 recent scores. "
+                f"Current: {summary.get('recent_count', 0)}"
+            )
+            st.caption(
+                "Score more transactions via the Score Transaction tab "
+                "or Batch Scorer to build up enough data."
+            )
+
+    else:
+        # Not yet run
+        st.info("Click 'Run Drift Check' to analyse model drift.")
+
+        st.subheader("How Drift Detection Works")
+        st.markdown("""
+        **PSI (Population Stability Index)** measures how much the
+        distribution of fraud scores has shifted between a reference
+        period (last 7 days) and a recent window (last 24 hours).
+
+        | PSI Range | Status | Action |
+        |---|---|---|
+        | < 0.1 | Stable | No action needed |
+        | 0.1 – 0.2 | Monitor | Watch closely |
+        | > 0.2 | Drift | Retrain model |
+
+        **KL Divergence** measures information loss between the two
+        distributions — a complementary signal to PSI.
+
+        The system automatically flags when retraining is recommended
+        and shows which direction the scores have drifted.
+        """)
