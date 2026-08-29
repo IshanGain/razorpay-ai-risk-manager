@@ -217,7 +217,7 @@ class TestAudit:
         score_r = requests.post(f"{API_BASE}/score", json=sample_transaction)
         txn_id = score_r.json()["audit"]["txn_id"]
 
-        history_r = requests.get(f"{API_BASE}/audit/history?limit=100")
+        history_r = requests.get(f"{API_BASE}/audit/history?limit=500")
         history = history_r.json()
         # Match on partial ID (first 12 chars)
         txn_ids = [h.get("audit_id", "")[:12] for h in history]

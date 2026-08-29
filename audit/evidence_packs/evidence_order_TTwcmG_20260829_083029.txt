@@ -1,0 +1,60 @@
+╔══════════════════════════════════════════════════════════════╗
+║           RAZORPAY AI RISK MANAGER                           ║
+║           CHARGEBACK EVIDENCE PACK                           ║
+╚══════════════════════════════════════════════════════════════╝
+
+Generated    : 2026-08-29 08:30:29 UTC
+Report Type  : Fraud Decision Evidence
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TRANSACTION DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Transaction ID   : order_TTwcmGyJ2hWTFv
+Audit ID         : test_abc123
+Timestamp        : 2026-08-25T09:00:18+00:00
+Amount           : INR 250.00
+Merchant ID      : merchant_123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FRAUD DECISION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Decision         : STEP_UP_2FA
+Fraud Score      : 0.3443 (range: 0.0 = safe, 1.0 = fraud)
+Detection Path   : ML_MODEL
+Latency          : 27.5ms
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RISK FACTORS (SHAP EXPLANATION)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Top risk factors that contributed to this decision:
+
+  1. HIGH_C14
+  2. LOW_CARD1_MEAN_AMT
+  3. HIGH_C13
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODEL INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Model Version    : lgbm-v1.0
+Algorithm        : LightGBM + Isotonic Calibration
+Features Used    : 451 (V, C, D, M, id cols + engineered)
+Explainability   : TreeSHAP
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THRESHOLD CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+APPROVE    : P(Fraud) < 0.10
+STEP_UP    : 0.10 <= P(Fraud) < 0.35
+DECLINE    : P(Fraud) >= 0.35
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISCLAIMER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This evidence pack was generated automatically by the Razorpay
+AI Risk Manager system. The fraud score and decision are based
+on machine learning analysis of transaction features.
+This document is for internal use and chargeback dispute only.
+
+══════════════════════════════════════════════════════════════
+END OF EVIDENCE PACK
+══════════════════════════════════════════════════════════════
