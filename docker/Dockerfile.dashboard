@@ -9,6 +9,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY dashboard/ ./dashboard/
 COPY batch/     ./batch/
+COPY mlops/     ./mlops/
 
 EXPOSE 8501
 
