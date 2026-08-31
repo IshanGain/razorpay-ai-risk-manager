@@ -10,13 +10,11 @@ Track 02 — AI Risk Manager | AI Buildathon 2026
 
 ---
 
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
-![LightGBM](https://img.shields.io/badge/LightGBM-4.3.0-2E7D32?style=flat-square)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.35-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-51%20passing-2E7D32?style=flat-square)
-![AUC](https://img.shields.io/badge/AUC--ROC-0.9187-1565C0?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-6D28D9?style=flat-square)
+![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI_0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit_1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![AUC-ROC](https://img.shields.io/badge/AUC--ROC%3A%200.9187-2B6BE6?style=for-the-badge)
+![Tests](https://img.shields.io/badge/51%20Tests%20Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
 
 </div>
 
