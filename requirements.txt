@@ -3,10 +3,10 @@ shap==0.45.0
 fastapi==0.111.0
 uvicorn==0.29.0
 pydantic==2.7.1
-numpy==1.26.4
-pandas==2.1.4
+numpy==1.24.4
+pandas==2.0.3
 scikit-learn==1.4.2
-matplotlib==3.8.4
+matplotlib==3.7.5
 streamlit==1.35.0
 plotly==5.22.0
 requests==2.31.0
