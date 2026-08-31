@@ -2,7 +2,7 @@ services:
   - type: web
     name: razorpay-risk-api
     runtime: python
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+    buildCommand: pip install --prefer-binary -r requirements.txt
     startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: RAZORPAY_KEY_ID
@@ -13,7 +13,7 @@ services:
   - type: web
     name: razorpay-risk-dashboard
     runtime: python
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install --prefer-binary -r requirements.txt
+    buildCommand: pip install --prefer-binary -r requirements.txt
     startCommand: streamlit run dashboard/app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
       - key: API_BASE
