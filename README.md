@@ -1,45 +1,22 @@
 <div align="center">
 
-<br/>
+<img src="https://razorpay.com/favicon.ico" width="48" />
 
-<img src="https://razorpay.com/favicon.ico" width="64" />
+# Razorpay AI Risk Manager
 
-<br/><br/>
+**Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.**
 
-<h1>Razorpay AI Risk Manager</h1>
+Track 02 — AI Risk Manager | AI Buildathon 2026
 
-<p><strong>Real-time fraud detection with explainable decisions, cold-start handling,<br/>and full Razorpay test-mode integration.</strong></p>
+---
 
-<p><sub>Track 02 — AI Risk Manager &nbsp;|&nbsp; AI Buildathon 2026</sub></p>
-
-<br/>
-
-![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI_0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit_1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![AUC-ROC](https://img.shields.io/badge/AUC--ROC%3A%200.9187-2B6BE6?style=for-the-badge)
-![Tests](https://img.shields.io/badge/51%20Tests%20Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
-
-<br/><br/>
-
-<table>
-<tr>
-<td align="center" width="200">
-<strong>0.9187</strong><br/><sub>AUC-ROC</sub>
-</td>
-<td align="center" width="200">
-<strong>0.8854</strong><br/><sub>Precision (HIGH_PRECISION)</sub>
-</td>
-<td align="center" width="200">
-<strong>66.6%</strong><br/><sub>Combined Fraud Coverage</sub>
-</td>
-<td align="center" width="200">
-<strong>0.13%</strong><br/><sub>False Positive Rate</sub>
-</td>
-</tr>
-</table>
-
-<br/>
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
+![LightGBM](https://img.shields.io/badge/LightGBM-4.3.0-2E7D32?style=flat-square)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-1.35-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-51%20passing-2E7D32?style=flat-square)
+![AUC](https://img.shields.io/badge/AUC--ROC-0.9187-1565C0?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-6D28D9?style=flat-square)
 
 </div>
 
@@ -55,23 +32,23 @@ The system handles the full fraud detection lifecycle — from transaction inges
 
 ## Evaluation Metrics
 
-> Evaluated on the IEEE-CIS Fraud Detection dataset, held-out validation set of 118,108 transactions.
+Evaluated on the IEEE-CIS Fraud Detection dataset, held-out validation set of 118,108 transactions.
 
 | Metric | HIGH_PRECISION | BALANCED |
-|:---|:---:|:---:|
+|---|---|---|
 | AUC-ROC | 0.9187 | 0.9187 |
 | Precision | **0.8854** | 0.7047 |
 | Recall | 0.2756 | 0.4011 |
 | False Positive Rate | **0.0013** | 0.0060 |
 | F1 Score | 0.4198 | 0.5117 |
 
-| | |
-|:---|:---|
-| **Combined fraud coverage** | 66.6% of all fraud addressed (40.1% hard declined + 26.5% routed to 2FA) |
-| **False positives (HIGH_PRECISION)** | 145 legitimate transactions wrongly declined out of 114,044 (0.13%) |
-| **Model** | LightGBM, 3,129 trees, 451 features, isotonic calibration |
-| **Training set** | 472,432 transactions |
-| **Validation set** | 118,108 transactions |
+**Combined fraud coverage:** 66.6% of all fraud addressed (40.1% hard declined + 26.5% routed to 2FA)
+
+**False positives in HIGH_PRECISION mode:** 145 legitimate transactions wrongly declined out of 114,044 (0.13%)
+
+**Model:** LightGBM, 3,129 trees, 451 features, isotonic calibration
+
+**Training set:** 472,432 transactions | **Validation set:** 118,108 transactions
 
 ---
 
@@ -81,38 +58,38 @@ The system handles the full fraud detection lifecycle — from transaction inges
 flowchart TD
     A([Incoming Transaction]) --> B
 
-    subgraph INGESTION ["⬡  Layer 1 — Ingestion and Gateway"]
+    subgraph INGESTION ["Layer 1 — Ingestion and Gateway"]
         B[FastAPI + Pydantic V2\nSchema Validation < 1ms]
         B --> C[OPA Hard Blocklist\nKnown-bad IPs / BINs < 2ms]
     end
 
     C --> D
 
-    subgraph ROUTER ["⬡  Layer 2 — Cold-Start Router"]
+    subgraph ROUTER ["Layer 2 — Cold-Start Router"]
         D{Entity History\nCheck}
-        D -- "< 10 txns" --> E[Rule-Based Fallback\nConservative Static Rules]
-        D -- "≥ 10 txns" --> F[Warm Path\nML Model]
+        D -- "less than 10 txns" --> E[Rule-Based Fallback\nConservative Static Rules]
+        D -- "10 or more txns" --> F[Warm Path\nML Model]
     end
 
-    subgraph FEATURES ["⬡  Layer 3 — Feature Store"]
+    subgraph FEATURES ["Layer 3 — Feature Store"]
         F --> G[Velocity Features\n1h / 6h / 24h windows]
-        G --> H[Amount and Time Features\nlog amount · hour · weekend flag]
-        H --> I[Entity Aggregates\ncard mean · card freq · addr freq]
+        G --> H[Amount and Time Features\nlog amount, hour, weekend flag]
+        H --> I[Entity Aggregates\ncard mean, card freq, addr freq]
     end
 
-    subgraph MODEL ["⬡  Layer 4 — Model Inference"]
-        I --> J[LightGBM\n3129 trees · 451 features]
-        J --> K[Isotonic Calibration\nP Fraud ∈ 0 → 1]
+    subgraph MODEL ["Layer 4 — Model Inference"]
+        I --> J[LightGBM\n3129 trees, 451 features]
+        J --> K[Isotonic Calibration\nP Fraud in 0 to 1]
     end
 
-    subgraph THRESHOLD ["⬡  Layer 5 — Dynamic Threshold Engine"]
+    subgraph THRESHOLD ["Layer 5 — Dynamic Threshold Engine"]
         K --> L{FPR-Constrained\nRouting}
         L -- "P Fraud < 0.10" --> M([APPROVE])
-        L -- "0.10 – 0.35" --> N([STEP_UP_2FA])
-        L -- "P Fraud ≥ 0.35" --> O([DECLINE])
+        L -- "0.10 to 0.35" --> N([STEP_UP_2FA])
+        L -- "P Fraud >= 0.35" --> O([DECLINE])
     end
 
-    subgraph EXPLAIN ["⬡  Layer 6 — Explainability"]
+    subgraph EXPLAIN ["Layer 6 — Explainability"]
         N --> P[TreeSHAP\nTop-3 Reason Codes]
         O --> P
         M --> P
@@ -122,31 +99,12 @@ flowchart TD
     P --> R[Merchant Webhook\nSTEP_UP and DECLINE]
     Q --> S[Evidence Pack\nChargeback PDF]
 
-    style A fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
-    style INGESTION fill:#0f1b3d,stroke:#2B6BE6,color:#a8c4ff
-    style ROUTER fill:#0f1b3d,stroke:#5B9BD5,color:#a8c4ff
-    style FEATURES fill:#0f1b3d,stroke:#2B6BE6,color:#a8c4ff
-    style MODEL fill:#0f1b3d,stroke:#5B9BD5,color:#a8c4ff
-    style THRESHOLD fill:#0f1b3d,stroke:#2B6BE6,color:#a8c4ff
-    style EXPLAIN fill:#0f1b3d,stroke:#5B9BD5,color:#a8c4ff
-    style B fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style C fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style D fill:#163060,stroke:#5B9BD5,color:#ddeeff
-    style E fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style F fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style G fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style H fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style I fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style J fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style K fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style L fill:#163060,stroke:#5B9BD5,color:#ddeeff
-    style M fill:#0d3d1f,stroke:#22c55e,color:#bbf7d0
-    style N fill:#3d2a00,stroke:#f59e0b,color:#fef3c7
-    style O fill:#3d0a0a,stroke:#ef4444,color:#fee2e2
-    style P fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style Q fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style R fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style S fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
+    style INGESTION fill:#1a1a2e,stroke:#3d7fff,color:#e8ecf4
+    style ROUTER fill:#1a1a2e,stroke:#a855f7,color:#e8ecf4
+    style FEATURES fill:#1a1a2e,stroke:#00d4aa,color:#e8ecf4
+    style MODEL fill:#1a1a2e,stroke:#ff6b35,color:#e8ecf4
+    style THRESHOLD fill:#1a1a2e,stroke:#a855f7,color:#e8ecf4
+    style EXPLAIN fill:#1a1a2e,stroke:#3d7fff,color:#e8ecf4
 ```
 
 ---
@@ -155,34 +113,26 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A([Transaction\nINR 250]) --> B{Cold Start?}
+    A[Transaction\nINR 250] --> B{Cold Start?}
     B -- Yes --> C[Rule Engine\nDefault prior 0.45]
     B -- No --> D[LightGBM\nP Fraud = 0.34]
 
     C --> E{Threshold\nRouting}
     D --> E
 
-    E -- "< 0.10" --> F([APPROVE\nLog + Continue])
-    E -- "0.10 – 0.35" --> G([STEP_UP_2FA\nLog + Webhook + 2FA])
-    E -- "≥ 0.35" --> H([DECLINE\nLog + Webhook + Block])
+    E -- "< 0.10" --> F[APPROVE\nLog + Continue]
+    E -- "0.10 to 0.35" --> G[STEP_UP_2FA\nLog + Webhook + 2FA]
+    E -- ">= 0.35" --> H[DECLINE\nLog + Webhook + Block]
 
-    G --> I[SHAP Reasons\nHIGH_C14 · LOW_CARD1_MEAN_AMT · HIGH_C13]
+    G --> I[SHAP Reasons\nHIGH_C14\nLOW_CARD1_MEAN_AMT\nHIGH_C13]
     H --> I
 
     I --> J[Audit Record\nImmutable JSONL]
-    J --> K([Evidence Pack\nChargeback PDF])
+    J --> K[Evidence Pack\nChargeback PDF]
 
-    style A fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
-    style B fill:#163060,stroke:#5B9BD5,color:#ddeeff
-    style C fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style D fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style E fill:#163060,stroke:#5B9BD5,color:#ddeeff
-    style F fill:#0d3d1f,stroke:#22c55e,color:#bbf7d0
-    style G fill:#3d2a00,stroke:#f59e0b,color:#fef3c7
-    style H fill:#3d0a0a,stroke:#ef4444,color:#fee2e2
-    style I fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style J fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style K fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
+    style F fill:#14532d,stroke:#22c55e,color:#dcfce7
+    style G fill:#713f12,stroke:#eab308,color:#fef9c3
+    style H fill:#7f1d1d,stroke:#ef4444,color:#fee2e2
 ```
 
 ---
@@ -200,7 +150,7 @@ xychart-beta
 
 ---
 
-## Repository Structure
+## Repo Structure
 
 ```
 razorpay-ai-risk-manager/
@@ -251,7 +201,7 @@ razorpay-ai-risk-manager/
 
 ## Quick Start
 
-> **Prerequisites:** Python 3.12, pip, a Razorpay test account
+**Prerequisites:** Python 3.12, pip, a Razorpay test account
 
 ```bash
 # 1. Clone the repository
@@ -280,18 +230,19 @@ streamlit run dashboard/app.py
 pytest tests/ -v
 ```
 
-| Service | URL |
-|:---|:---|
-| API Docs | `http://localhost:8000/docs` |
-| Dashboard | `http://localhost:8501` |
+API docs available at `http://localhost:8000/docs`
+
+Dashboard available at `http://localhost:8501`
 
 ---
 
 ## API Reference
 
-### `POST /score` — Score a Transaction
+### Score a transaction
 
-**Request**
+```bash
+POST /score
+```
 
 ```json
 {
@@ -308,7 +259,7 @@ pytest tests/ -v
 }
 ```
 
-**Response**
+**Response:**
 
 ```json
 {
@@ -324,34 +275,45 @@ pytest tests/ -v
     "merchant_id": "merchant_123",
     "amount": 250.0,
     "decision": "STEP_UP_2FA",
-    "thresholds": { "approve": 0.1, "stepup": 0.35, "decline": 0.35 }
+    "thresholds": {
+      "approve": 0.1,
+      "stepup": 0.35,
+      "decline": 0.35
+    }
   }
 }
 ```
 
-### `POST /razorpay/create-order` — Create a Razorpay Test Order
+### Create a Razorpay test order
 
-```
+```bash
 POST /razorpay/create-order?amount_inr=250&merchant_id=merchant_123
 ```
 
-### `POST /batch` — Batch Score from CSV
+### Batch score from CSV
 
-```json
+```bash
+POST /batch
+Content-Type: application/json
+
 [
   { "TransactionAmt": 250.0, "card1": 9500 },
   { "TransactionAmt": 1500.0, "card1": 1234 }
 ]
 ```
 
-### `GET /audit/history` — Audit History
+### Audit history
 
-```
+```bash
 GET /audit/history?limit=50
 GET /audit/stats?hours=24
 ```
 
-### `GET /health` — Health Check
+### Health check
+
+```bash
+GET /health
+```
 
 ```json
 {
@@ -366,16 +328,16 @@ GET /audit/stats?hours=24
 
 ## Dashboard
 
-The Streamlit ops panel ships with 6 tabs:
+The Streamlit ops panel has 6 tabs:
 
 | Tab | Description |
-|:---|:---|
-| **Live Dashboard** | Real-time fraud rate, decision breakdown, fraud score gauge, recent decisions |
-| **Score Transaction** | Interactive scoring form with Razorpay order creation and SHAP reasons |
-| **Audit History** | Filterable decision log with CSV download |
-| **Model Info** | Eval metrics, threshold config, architecture summary |
-| **Batch Scorer** | CSV upload — scored table with SHAP reasons per row and distribution chart |
-| **Drift Monitor** | PSI and KL divergence monitoring with retrain alert and score means chart |
+|---|---|
+| Live Dashboard | Real-time fraud rate, decision breakdown, fraud score gauge, recent decisions |
+| Score Transaction | Interactive scoring form with Razorpay order creation and SHAP reasons |
+| Audit History | Filterable decision log with CSV download |
+| Model Info | Eval metrics, threshold config, architecture summary |
+| Batch Scorer | CSV upload — scored table with SHAP reasons per row and distribution chart |
+| Drift Monitor | PSI and KL divergence monitoring with retrain alert and score means chart |
 
 ---
 
@@ -384,26 +346,26 @@ The Streamlit ops panel ships with 6 tabs:
 Features engineered on top of the raw IEEE-CIS columns:
 
 | Feature | Description |
-|:---|:---|
-| `card1_vel_3600s` | Card transaction count in last 1 hour |
-| `card1_vel_21600s` | Card transaction count in last 6 hours |
-| `card1_vel_86400s` | Card transaction count in last 24 hours |
-| `log_amount` | Log-transformed transaction amount |
-| `amount_rounded` | Binary flag — amount is a round number |
-| `amount_gt_500` | Binary flag — amount exceeds INR 500 |
-| `card1_mean_amt` | Card-level mean transaction amount |
-| `card1_std_amt` | Card-level standard deviation of amount |
-| `amt_vs_card_mean` | Ratio of transaction amount to card mean |
-| `hour_of_day` | Hour extracted from TransactionDT |
-| `is_night` | Binary flag — transaction between 22:00 and 05:00 |
-| `is_weekend` | Binary flag — Saturday or Sunday |
-| `risky_email_domain` | Binary flag — protonmail, guerrillamail, tempmail, yopmail |
-| `email_match` | Binary flag — P_emaildomain matches R_emaildomain |
-| `addr_mismatch` | Binary flag — addr1 != addr2 |
-| `is_cold_start` | Binary flag — entity has fewer than 10 historical transactions |
-| `card1_freq` | Card-level transaction frequency encoding |
-| `card2_freq` | Card2-level transaction frequency encoding |
-| `addr1_freq` | Address-level transaction frequency encoding |
+|---|---|
+| card1_vel_3600s | Card transaction count in last 1 hour |
+| card1_vel_21600s | Card transaction count in last 6 hours |
+| card1_vel_86400s | Card transaction count in last 24 hours |
+| log_amount | Log-transformed transaction amount |
+| amount_rounded | Binary flag — amount is a round number |
+| amount_gt_500 | Binary flag — amount exceeds INR 500 |
+| card1_mean_amt | Card-level mean transaction amount |
+| card1_std_amt | Card-level standard deviation of amount |
+| amt_vs_card_mean | Ratio of transaction amount to card mean |
+| hour_of_day | Hour extracted from TransactionDT |
+| is_night | Binary flag — transaction between 22:00 and 05:00 |
+| is_weekend | Binary flag — Saturday or Sunday |
+| risky_email_domain | Binary flag — protonmail, guerrillamail, tempmail, yopmail |
+| email_match | Binary flag — P_emaildomain matches R_emaildomain |
+| addr_mismatch | Binary flag — addr1 != addr2 |
+| is_cold_start | Binary flag — entity has fewer than 10 historical transactions |
+| card1_freq | Card-level transaction frequency encoding |
+| card2_freq | Card2-level transaction frequency encoding |
+| addr1_freq | Address-level transaction frequency encoding |
 
 Plus all V (339), C (14), D (15), M (9), and id (41) columns from the raw dataset.
 
@@ -413,37 +375,28 @@ Plus all V (339), C (14), D (15), M (9), and id (41) columns from the raw datase
 
 ```mermaid
 flowchart LR
-    A([IEEE-CIS Dataset\n590,540 transactions]) --> B[Merge transaction\nand identity tables]
+    A[IEEE-CIS Dataset\n590540 transactions] --> B[Merge transaction\nand identity tables]
     B --> C[Feature Engineering\n451 features]
-    C --> D[Time-based Split\n80% train · 20% val]
+    C --> D[Time-based Split\n80 percent train 20 percent val]
     D --> E[LightGBM Training\nscale_pos_weight 27.5\nearly stopping]
-    E --> F[Isotonic Calibration\nP Fraud ∈ 0 → 1]
+    E --> F[Isotonic Calibration\nP Fraud in 0 to 1]
     F --> G[FPR-Constrained\nThreshold Selection]
-    G --> H([Export Artifacts\nlgbm · calibrator · metadata])
-
-    style A fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
-    style B fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style C fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style D fill:#1a3a7a,stroke:#5B9BD5,color:#ddeeff
-    style E fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style F fill:#1a3a7a,stroke:#5B9BD5,color:#ddeeff
-    style G fill:#1a3a7a,stroke:#2B6BE6,color:#ddeeff
-    style H fill:#2B6BE6,stroke:#1a4fbb,color:#ffffff
+    G --> H[Export Artifacts\nlgbm model + calibrator + metadata]
 ```
 
-**Training Configuration**
+**Training configuration:**
 
-| Parameter | Value |
-|:---|:---|
-| Objective | binary |
-| Learning rate | 0.01 |
-| Num leaves | 31 |
-| Max depth | 6 |
-| Min child samples | 100 |
-| Feature fraction | 0.7 |
-| Bagging fraction | 0.7 |
-| Scale pos weight | 27.5 (neg / pos ratio) |
-| Best iteration | 3129 (early stopping at round 3129) |
+```
+Objective         : binary
+Learning rate     : 0.01
+Num leaves        : 31
+Max depth         : 6
+Min child samples : 100
+Feature fraction  : 0.7
+Bagging fraction  : 0.7
+Scale pos weight  : 27.5 (neg / pos ratio)
+Best iteration    : 3129 (early stopping at round 3129)
+```
 
 ---
 
@@ -451,15 +404,22 @@ flowchart LR
 
 The `mlops/drift.py` module computes PSI (Population Stability Index) between a 7-day reference window and a 24-hour recent window.
 
-| PSI Range | Status |
-|:---|:---|
-| PSI < 0.1 | Stable — no action needed |
-| PSI 0.1–0.2 | Monitor — watch closely |
-| PSI > 0.2 | Drift detected — retrain recommended |
+```
+PSI < 0.1   —  Stable, no action needed
+PSI 0.1-0.2 —  Monitor, watch closely
+PSI > 0.2   —  Drift detected, retrain recommended
+```
+
+PSI is computed as:
 
 ```
 PSI = sum((actual_pct - expected_pct) * ln(actual_pct / expected_pct))
-KL  = sum(p * ln(p / q))
+```
+
+KL divergence is computed as a complementary signal:
+
+```
+KL = sum(p * ln(p / q))
 ```
 
 ---
@@ -469,10 +429,10 @@ KL  = sum(p * ln(p / q))
 New entities with fewer than 10 historical transactions bypass the ML model and are scored by a conservative rule engine:
 
 | Condition | Risk Adjustment |
-|:---|:---|
+|---|---|
 | Default prior | P(Fraud) = 0.45 |
 | Amount exceeds limit (INR 500) | P(Fraud) = max(current, 0.78) |
-| Night-time transaction | Limit reduced to INR 350 · P(Fraud) += 0.10 |
+| Night-time transaction | Limit reduced to INR 350, P(Fraud) += 0.10 |
 | Risky email domain | P(Fraud) = max(current, 0.85) |
 | P(Fraud) ceiling | 0.95 |
 
@@ -482,17 +442,26 @@ Warm-up threshold: 10 transactions. After 10 transactions the entity graduates t
 
 ## Test Suite
 
-<div align="center">
+```
+51 tests — 0 failures
 
-**51 tests &nbsp;·&nbsp; 0 failures**
+tests/test_api.py          30 tests
+  TestHealth               4 tests  — /health schema, Razorpay connection
+  TestScore                9 tests  — schema, p_fraud range, latency, 422 validation
+  TestColdStart            3 tests  — path routing, rule triggers
+  TestThresholds           2 tests  — high risk routing, decision consistency
+  TestAudit                5 tests  — stats, history, audit record creation
+  TestBatch                3 tests  — 200 response, summary count, results count
 
-</div>
+tests/test_threshold.py    13 tests
+  TestThresholdLogic        8 tests  — boundary conditions, all decisions covered
+  TestColdStartRules        7 tests  — risk adjustments, reason codes, caps
 
-| File | Tests | Coverage |
-|:---|:---:|:---|
-| `tests/test_api.py` | 30 | /health schema, /score schema, cold-start routing, threshold routing, audit endpoints, batch scoring |
-| `tests/test_threshold.py` | 13 | Boundary conditions, all decisions covered, risk adjustments, reason codes, caps |
-| `tests/test_audit.py` | 10 | Log, retrieve, filter, stats, append-only guarantee |
+tests/test_audit.py        10 tests
+  TestAuditLogger          10 tests  — log, retrieve, filter, stats, append-only
+```
+
+Run with:
 
 ```bash
 pytest tests/ -v
@@ -507,7 +476,7 @@ pytest tests/ -v
 docker build -t razorpay-risk-api .
 docker run -p 8000:8000 --env-file .env razorpay-risk-api
 
-# Run full stack with compose
+# Or run full stack with compose
 docker-compose -f docker/docker-compose.yml up
 ```
 
@@ -518,7 +487,7 @@ docker-compose -f docker/docker-compose.yml up
 **IEEE-CIS Fraud Detection** — Kaggle competition dataset
 
 | Property | Value |
-|:---|:---|
+|---|---|
 | Total transactions | 590,540 |
 | Fraud rate | 3.50% (20,663 frauds) |
 | Features after merge | 434 raw + 17 engineered = 451 total |
@@ -532,7 +501,7 @@ docker-compose -f docker/docker-compose.yml up
 ## Tech Stack
 
 | Layer | Technology |
-|:---|:---|
+|---|---|
 | API | FastAPI 0.111, Uvicorn, Pydantic V2 |
 | Model | LightGBM 4.3.0, scikit-learn 1.4.2 |
 | Explainability | SHAP 0.45 (TreeSHAP) |
@@ -549,53 +518,55 @@ docker-compose -f docker/docker-compose.yml up
 
 ## Environment Variables
 
+Copy `.env.example` to `.env` and fill in your credentials:
+
 ```bash
 cp .env.example .env
 ```
 
 | Variable | Description | Where to get it |
-|:---|:---|:---|
-| `RAZORPAY_KEY_ID` | Test-mode key ID | dashboard.razorpay.com/app/keys |
-| `RAZORPAY_KEY_SECRET` | Test-mode key secret | dashboard.razorpay.com/app/keys |
+|---|---|---|
+| RAZORPAY_KEY_ID | Test-mode key ID | dashboard.razorpay.com/app/keys |
+| RAZORPAY_KEY_SECRET | Test-mode key secret | dashboard.razorpay.com/app/keys |
 
-> **Security:** Never commit `.env` to version control. It is listed in `.gitignore`.
+Never commit `.env` to version control. It is listed in `.gitignore`.
 
 ---
 
-## Build Status
+## What is Built vs What is Planned
 
-| Component | Status |
-|:---|:---|
-| LightGBM training pipeline | `Built` — IEEE-CIS, 451 features, isotonic calibration |
-| Cold-start rule engine | `Built` — conservative fallback for < 10 txn entities |
-| Dynamic threshold routing | `Built` — 3 configs, FPR ceiling enforced |
-| FastAPI inference server | `Built` — /score /batch /health /audit /razorpay |
-| Razorpay test-mode integration | `Built` — real orders via rzp_test_ keys |
-| Merchant webhooks | `Built` — fires on STEP_UP and DECLINE |
-| Immutable audit logger | `Built` — append-only JSONL |
-| Chargeback evidence packs | `Built` — auto-generated text reports |
-| Streamlit ops dashboard | `Built` — 6 tabs including drift monitor |
-| Batch CSV scorer | `Built` — SHAP reasons per row |
-| PSI drift detection | `Built` — 7-day vs 24-hour comparison |
-| Unit tests | `Built` — 51 tests, 0 failures |
-| Docker containerization | `Built` — API + dashboard |
-| GraphSAGE graph model | `Planned` — syndicate and mule ring detection |
-| Redis live feature store | `Planned` — real-time velocity computation |
-| ClickHouse event log | `Planned` — long-term storage for retraining |
-| Automated retraining pipeline | `Planned` — triggered when PSI exceeds 0.2 |
+| Component | Status | Notes |
+|---|---|---|
+| LightGBM training pipeline | Built | IEEE-CIS, 451 features, isotonic calibration |
+| Cold-start rule engine | Built | Conservative fallback for < 10 txn entities |
+| Dynamic threshold routing | Built | 3 configs, FPR ceiling enforced |
+| FastAPI inference server | Built | /score /batch /health /audit /razorpay |
+| Razorpay test-mode integration | Built | Real orders via rzp_test_ keys |
+| Merchant webhooks | Built | Fires on STEP_UP and DECLINE |
+| Immutable audit logger | Built | Append-only JSONL |
+| Chargeback evidence packs | Built | Auto-generated text reports |
+| Streamlit ops dashboard | Built | 6 tabs including drift monitor |
+| Batch CSV scorer | Built | SHAP reasons per row |
+| PSI drift detection | Built | 7-day vs 24-hour comparison |
+| Unit tests | Built | 51 tests, 0 failures |
+| Docker containerization | Built | API + dashboard |
+| GraphSAGE graph model | Planned | Syndicate and mule ring detection |
+| Redis live feature store | Planned | Real-time velocity computation |
+| ClickHouse event log | Planned | Long-term storage for retraining |
+| Automated retraining pipeline | Planned | Triggered when PSI exceeds 0.2 |
 
 ---
 
 ## Author
 
-**Ishan Gain** — AI Buildathon 2026, Track 02: AI Risk Manager
-
+**Ishan Gain**
+AI Buildathon 2026 — Track 02: AI Risk Manager
 GitHub: [IshanGain](https://github.com/IshanGain)
 
 ---
 
 <div align="center">
 
-<sub>Built for Razorpay AI Buildathon 2026</sub>
+Built for Razorpay AI Buildathon 2026
 
 </div>
