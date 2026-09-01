@@ -100,14 +100,20 @@ def get_health():
 def get_audit_stats(hours=24):
     try:
         r = requests.get(f"{API_BASE}/audit/stats?hours={hours}", timeout=3)
-        return r.json()
+        data = r.json()
+        if isinstance(data, dict):
+            return data
+        return {}
     except:
         return {}
 
 def get_audit_history(limit=20):
     try:
         r = requests.get(f"{API_BASE}/audit/history?limit={limit}", timeout=3)
-        return r.json()
+        data = r.json()
+        if isinstance(data, list):
+            return data
+        return []
     except:
         return []
 
