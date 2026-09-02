@@ -178,6 +178,13 @@ Evaluated on the IEEE-CIS Fraud Detection dataset — **118,108 validation trans
 
 **Training data:** 472,432 transactions &nbsp;|&nbsp; **Validation data:** 118,108 transactions
 
+<br />
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/IshanGain/razorpay-ai-risk-manager/main/outputs/evaluation_charts.png" alt="Evaluation Charts" width="80%" />
+<br /><sub>Precision–recall, ROC, and threshold distribution across HIGH_PRECISION and BALANCED modes</sub>
+</div>
+
 ---
 
 ## Project Structure
@@ -390,6 +397,13 @@ The Streamlit ops panel is live at **https://razorpay-risk-dashboard.onrender.co
 | Entity | card1_freq, card2_freq, addr1_freq, email_match, addr_mismatch |
 | Risk signals | risky_email_domain, is_cold_start |
 
+<br />
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/IshanGain/razorpay-ai-risk-manager/main/outputs/shap_importance.png" alt="SHAP Feature Importance" width="80%" />
+<br /><sub>Top features by mean absolute SHAP value — TreeSHAP computed on the 118,108-transaction validation set</sub>
+</div>
+
 ---
 
 ## Test Suite
@@ -468,6 +482,13 @@ Training pipeline uses the IEEE-CIS Fraud Detection dataset:
 | Bagging fraction | 0.7 |
 | Scale pos weight | 27.5 |
 | Best iteration | 3129 (early stopping) |
+
+<br />
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/IshanGain/razorpay-ai-risk-manager/main/outputs/eda_snapshot.png" alt="EDA Snapshot" width="80%" />
+<br /><sub>Exploratory data analysis — transaction amount distribution, fraud rate by hour, and class imbalance overview</sub>
+</div>
 
 ---
 
