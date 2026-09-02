@@ -20,11 +20,103 @@ Track 02 — AI Risk Manager | AI Buildathon 2026
 
 ---
 
+## At A Glance
+
+| Signal | Value |
+|---|---|
+| **Fraud model** | LightGBM + isotonic calibration |
+| **Decision paths** | ML inference or conservative cold-start rules |
+| **Outputs** | Approve, step up with 2FA, or decline |
+| **Controls** | Explainable reasons, immutable audit, drift monitoring |
+| **Interfaces** | FastAPI, Streamlit, Razorpay test mode |
+
+<p align="center">
+  <a href="#quick-start">Quick start</a> |
+  <a href="#architecture">Architecture</a> |
+  <a href="#api-reference">API</a> |
+  <a href="#dashboard">Dashboard</a> |
+  <a href="#docker-deployment">Deploy</a>
+</p>
+
 ## Overview
 
 Razorpay AI Risk Manager is a production-grade fraud detection system that scores transactions in real time, generates explainable decisions with SHAP reason codes, and integrates directly with Razorpay's test-mode API. Every decision is logged to an immutable audit trail and can be exported as a chargeback evidence pack.
 
 The system handles the full fraud detection lifecycle — from transaction ingestion and feature engineering, through ML inference and threshold routing, to merchant webhook delivery and drift monitoring.
+
+> [!IMPORTANT]
+> This project is configured for Razorpay **test mode**. Use test credentials in `.env` and never commit secrets.
+
+## Architecture
+
+The scoring path keeps low-history entities conservative while giving established entities the full calibrated model path.
+
+```mermaid
+flowchart LR
+  A[Checkout or webhook] --> B[FastAPI gateway]
+  B --> C{Cold start?}
+  C -->|Yes: under 10 txns| D[Conservative rule engine]
+  C -->|No: warm entity| E[Feature engineering]
+  E --> F[LightGBM model]
+  F --> G[Isotonic calibration]
+  D --> H[Risk probability]
+  G --> H
+  H --> I[Threshold engine]
+  I -->|Low risk| J[APPROVE]
+  I -->|Middle band| K[STEP_UP_2FA]
+  I -->|High risk| L[DECLINE]
+  J --> M[Append-only audit log]
+  K --> M
+  L --> M
+  K --> N[Merchant webhook]
+  L --> N
+  M --> O[Evidence pack]
+
+  classDef input fill:#e9f5ff,stroke:#1683d8,color:#102a43
+  classDef model fill:#fff4db,stroke:#d97706,color:#4a2600
+  classDef decision fill:#e9f8ef,stroke:#27945b,color:#123b25
+  classDef output fill:#f5efff,stroke:#815ac7,color:#2d1b4e
+  class A,B input
+  class D,E,F,G model
+  class H,I,J,K,L decision
+  class M,N,O output
+```
+
+### Decision Routing
+
+```mermaid
+flowchart TD
+  S[Transaction arrives] --> V{Schema and gateway checks pass?}
+  V -->|No| X[Reject request]
+  V -->|Yes| R{Entity history available?}
+  R -->|Fewer than 10 txns| C[Cold-start rules]
+  R -->|10 or more txns| M[Calibrated ML score]
+  C --> P[p_fraud]
+  M --> P
+  P --> T{Compare with thresholds}
+  T -->|p < approve| A[APPROVE]
+  T -->|approve <= p < stepup| U[STEP_UP_2FA]
+  T -->|p >= stepup| D[DECLINE]
+  A --> L[Audit decision]
+  U --> L
+  D --> L
+  U --> W[Fire merchant webhook]
+  D --> W
+```
+
+### Operating Model
+
+```mermaid
+flowchart LR
+  API[FastAPI API] --> LOG[JSONL decisions]
+  DASH[Streamlit dashboard] --> API
+  RZP[Razorpay test API] --> API
+  LOG --> EVIDENCE[Chargeback evidence pack]
+  LOG --> DRIFT[PSI and KL drift monitor]
+  DRIFT --> ALERT{PSI > 0.2?}
+  ALERT -->|Yes| RETRAIN[Retrain recommended]
+  ALERT -->|No| OBSERVE[Continue monitoring]
+```
 
 ---
 
