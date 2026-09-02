@@ -2,32 +2,53 @@
 
 <img src="https://razorpay.com/favicon.ico" width="56" />
 
+<br />
+
 # SentinelML
 
-### End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring
+**End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring**
 
 Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.
 
-**Track 02 — AI Risk Manager | AI Buildathon 2026**
+<sub>Track 02 — AI Risk Manager &nbsp;·&nbsp; AI Buildathon 2026</sub>
 
----
+<br />
 
 ![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI_0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit_1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![AUC-ROC](https://img.shields.io/badge/AUC--ROC%3A%200.9187-2B6BE6?style=for-the-badge)
-![Tests](https://img.shields.io/badge/51%20Tests%20Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
+![AUC-ROC](https://img.shields.io/badge/AUC--ROC_0.9187-2B6BE6?style=for-the-badge)
+![Tests](https://img.shields.io/badge/51_Tests_Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
 
----
+<br />
 
-[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-razorpay--risk--dashboard.onrender.com-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://razorpay-risk-dashboard.onrender.com)
-[![Live API](https://img.shields.io/badge/Live%20API-razorpay--risk--api.onrender.com-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://razorpay-risk-api.onrender.com/)
-
----
-
-[Quick Start](#quick-start) &nbsp;|&nbsp; [Architecture](#architecture) &nbsp;|&nbsp; [API Reference](#api-reference) &nbsp;|&nbsp; [Dashboard](#dashboard) &nbsp;|&nbsp; [Docker Deployment](#docker-deployment)
+[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-%E2%86%97_razorpay--risk--dashboard.onrender.com-FF4B4B?style=flat-square)](https://razorpay-risk-dashboard.onrender.com)
+&nbsp;&nbsp;
+[![Live API](https://img.shields.io/badge/Live_API-%E2%86%97_razorpay--risk--api.onrender.com-009688?style=flat-square)](https://razorpay-risk-api.onrender.com/)
 
 </div>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Project Structure](#project-structure)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+- [Dashboard](#dashboard)
+- [Features](#features)
+- [Test Suite](#test-suite)
+- [Cold-Start Handling](#cold-start-handling)
+- [Drift Detection](#drift-detection)
+- [Model Training](#model-training)
+- [Tech Stack](#tech-stack)
+- [Docker Deployment](#docker-deployment)
+- [Environment Variables](#environment-variables)
+- [Implementation Status](#implementation-status)
+- [Author](#author)
 
 ---
 
