@@ -34,8 +34,7 @@ st.markdown("""
     /* Hide the default Streamlit gradient line at the top */
     [data-testid="stDecoration"] { display: none; }
 
-    [data-testid="stAppViewContainer"] { background-color: #0b1121; }
-    [data-testid="stSidebar"]          { background-color: #121a2f; }
+    /* Keep primary button styling but allow everything else to adapt naturally */
     .stButton > button {
         background-color: #338cf0 !important;
         color: #ffffff !important;
@@ -45,9 +44,7 @@ st.markdown("""
         padding: 0.5rem 1rem;
     }
     .stButton > button:hover { background-color: #1d72d6 !important; }
-    [data-testid="stMetricValue"] { color: #ffffff; font-weight: 700; }
-    .stTabs [data-baseweb="tab"] { color: #94a3b8; font-weight: 500; }
-    .stTabs [aria-selected="true"] { color: #ffffff !important; }
+    
     .stDownloadButton > button {
         background-color: transparent !important;
         border: 1px solid #338cf0 !important;
@@ -187,8 +184,7 @@ with tab1:
                 marker_colors=["#10b981", "#f59e0b", "#ef4444"],
             )])
             fig.update_layout(
-                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                font_color="white", showlegend=True,
+                showlegend=True,
                 margin=dict(t=20, b=20, l=20, r=20), height=280,
             )
             st.plotly_chart(fig, use_container_width=True)
@@ -201,21 +197,19 @@ with tab1:
             mode="gauge+number",
             value=avg_score,
             domain={"x": [0, 1], "y": [0, 1]},
-            title={"text": "Avg P(Fraud)", "font": {"color": "white"}},
+            title={"text": "Avg P(Fraud)"},
             gauge={
-                "axis": {"range": [0, 1], "tickcolor": "white"},
-                "bar":  {"color": "#ffffff", "thickness": 0.2},
+                "axis": {"range": [0, 1]},
+                "bar":  {"thickness": 0.2, "color": "#888888"}, 
                 "steps": [
                     {"range": [0,    0.10], "color": "#10b981"},
                     {"range": [0.10, 0.35], "color": "#f59e0b"},
                     {"range": [0.35, 1.0],  "color": "#ef4444"},
                 ],
             },
-            number={"font": {"color": "white"}},
         ))
         fig.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            font_color="white", height=320,
+            height=320,
             margin=dict(t=60, b=20, l=40, r=40),
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -521,15 +515,13 @@ with tab5:
                         marker_color=["#10b981", "#f59e0b", "#ef4444"],
                     )])
                     fig.update_layout(
-                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                        font_color="white", height=300,
+                        height=300,
                         margin=dict(t=20, b=20, l=20, r=20),
-                        yaxis=dict(gridcolor="#1e2430"),
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
 # ════════════════════════════════════════════════════════════
-# TAB 6 — DRIFT Monitor
+# TAB 6 — DRIFT MONITOR
 # ════════════════════════════════════════════════════════════
 with tab6:
     st.subheader("Model Drift Monitor")
@@ -600,10 +592,9 @@ with tab6:
                     textposition="auto",
                 )])
                 fig.update_layout(
-                    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                    font_color="white", height=250,
+                    height=250,
                     margin=dict(t=20, b=20, l=20, r=20),
-                    yaxis=dict(gridcolor="#1e2430", title="Avg P(Fraud)"),
+                    yaxis=dict(title="Avg P(Fraud)"),
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
