@@ -2,7 +2,7 @@
 
 <img src="https://razorpay.com/favicon.ico" width="48" />
 
-# Razorpay AI Risk Manager
+# SentinelML: An End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring
 
 **Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.**
 
