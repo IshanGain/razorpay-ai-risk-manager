@@ -26,7 +26,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000")
+# Strip trailing slashes just in case they were added in the Render dashboard
+API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000").rstrip("/")
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -56,16 +57,17 @@ st.markdown("""
 # ── Helper functions ──────────────────────────────────────────────────────────
 def get_health():
     try:
-        r = requests.get(f"{API_BASE}/health", timeout=5)
+        r = requests.get(f"{API_BASE}/health", timeout=60)
         if r.status_code == 200:
             return r.json()
         return None
-    except Exception:
+    except Exception as e:
+        print(f"Health check failed: {e}")
         return None
 
 def get_audit_stats(hours=24):
     try:
-        r = requests.get(f"{API_BASE}/audit/stats?hours={hours}", timeout=5)
+        r = requests.get(f"{API_BASE}/audit/stats?hours={hours}", timeout=30)
         if r.status_code == 200:
             data = r.json()
             if isinstance(data, dict):
@@ -76,7 +78,7 @@ def get_audit_stats(hours=24):
 
 def get_audit_history(limit=20):
     try:
-        r = requests.get(f"{API_BASE}/audit/history?limit={limit}", timeout=5)
+        r = requests.get(f"{API_BASE}/audit/history?limit={limit}", timeout=30)
         if r.status_code == 200:
             data = r.json()
             if isinstance(data, list):
@@ -87,7 +89,7 @@ def get_audit_history(limit=20):
 
 def score_transaction(payload: dict):
     try:
-        r = requests.post(f"{API_BASE}/score", json=payload, timeout=15)
+        r = requests.post(f"{API_BASE}/score", json=payload, timeout=30)
         if r.status_code == 200:
             return r.json()
         return {"error": f"HTTP {r.status_code}"}
@@ -99,7 +101,7 @@ def create_order(amount_inr: float, merchant_id: str):
         r = requests.post(
             f"{API_BASE}/razorpay/create-order",
             params={"amount_inr": amount_inr, "merchant_id": merchant_id},
-            timeout=15
+            timeout=30
         )
         if r.status_code == 200:
             return r.json()
