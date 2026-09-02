@@ -6,7 +6,7 @@
 
 # SentinelML
 
-**End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring**
+<h3><strong>End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring</strong></h3>
 
 <sub>Track 02 — AI Risk Manager &nbsp;·&nbsp; AI Buildathon 2026</sub>
 
@@ -20,9 +20,24 @@
 
 <br />
 
-[![Live Dashboard](https://img.shields.io/badge/Live_Dashboard-%E2%86%97_razorpay--risk--dashboard.onrender.com-FF4B4B?style=flat-square)](https://razorpay-risk-dashboard.onrender.com)
-&nbsp;&nbsp;
-[![Live API](https://img.shields.io/badge/Live_API-%E2%86%97_razorpay--risk--api.onrender.com-009688?style=flat-square)](https://razorpay-risk-api.onrender.com/)
+<table>
+  <tr>
+    <td align="center" width="340">
+      <strong>Live Dashboard</strong><br />
+      <sub>Streamlit ops panel — real-time fraud monitoring, scoring, and drift detection</sub><br /><br />
+      <a href="https://razorpay-risk-dashboard.onrender.com">
+        <img src="https://img.shields.io/badge/razorpay--risk--dashboard.onrender.com-FF4B4B?style=for-the-badge&logoColor=white" alt="Live Dashboard" />
+      </a>
+    </td>
+    <td align="center" width="340">
+      <strong>Live API</strong><br />
+      <sub>FastAPI inference server — /score, /batch, /audit, /health endpoints</sub><br /><br />
+      <a href="https://razorpay-risk-api.onrender.com/">
+        <img src="https://img.shields.io/badge/razorpay--risk--api.onrender.com-009688?style=for-the-badge&logoColor=white" alt="Live API" />
+      </a>
+    </td>
+  </tr>
+</table>
 
 </div>
 
