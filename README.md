@@ -1,10 +1,22 @@
+<div align="center">
+
+<img src="https://razorpay.com/favicon.ico" width="48" />
+
 # Razorpay AI Risk Manager
 
-Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.
+**Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.**
 
 Track 02 — AI Risk Manager | AI Buildathon 2026
 
-**Status:** Production-ready | Python 3.12 | FastAPI 0.111 | LightGBM 4.3.0 | 51 Tests Passing | AUC-ROC: 0.9187
+---
+
+![Python](https://img.shields.io/badge/Python_3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI_0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit_1.35-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![AUC-ROC](https://img.shields.io/badge/AUC--ROC%3A%200.9187-2B6BE6?style=for-the-badge)
+![Tests](https://img.shields.io/badge/51%20Tests%20Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
+
+</div>
 
 ---
 
