@@ -26,11 +26,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000")
+API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000").rstrip("/")
 
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+    /* Hide the default Streamlit gradient line at the top */
+    [data-testid="stDecoration"] { display: none; }
+
     [data-testid="stAppViewContainer"] { background-color: #0b1121; }
     [data-testid="stSidebar"]          { background-color: #121a2f; }
     .stButton > button {
@@ -526,7 +529,7 @@ with tab5:
                     st.plotly_chart(fig, use_container_width=True)
 
 # ════════════════════════════════════════════════════════════
-# TAB 6 — DRIFT MONITOR
+# TAB 6 — DRIFT Monitor
 # ════════════════════════════════════════════════════════════
 with tab6:
     st.subheader("Model Drift Monitor")
