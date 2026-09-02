@@ -485,9 +485,9 @@ with tab5:
 
                 c1, c2, c3, c4, c5 = st.columns(5)
                 c1.metric("Total",       total_b)
-                c2.metric("Approved",    approve_b, f"{approve_b/max(total_b,1):.1%}")
-                c3.metric("Step-Up 2FA", stepup_b,  f"{stepup_b/max(total_b,1):.1%}")
-                c4.metric("Declined",    decline_b, f"{decline_b/max(total_b,1):.1%}")
+                c2.metric("Approved",    approve_b, f"{approve_b/max(total_b,1):.1%}", delta_color="normal")
+                c3.metric("Step-Up 2FA", stepup_b,  f"{stepup_b/max(total_b,1):.1%}", delta_color="off")
+                c4.metric("Declined",    decline_b, f"{decline_b/max(total_b,1):.1%}", delta_color="inverse")
                 c5.metric("Avg P(Fraud)", f"{avg_p:.4f}")
 
                 st.divider()
