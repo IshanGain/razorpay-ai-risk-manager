@@ -1,12 +1,14 @@
 <div align="center">
 
-<img src="https://razorpay.com/favicon.ico" width="48" />
+<img src="https://razorpay.com/favicon.ico" width="56" />
 
-# SentinelML: An End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring
+# SentinelML
 
-**Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.**
+### End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring
 
-Track 02 — AI Risk Manager | AI Buildathon 2026
+Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.
+
+**Track 02 — AI Risk Manager | AI Buildathon 2026**
 
 ---
 
@@ -16,11 +18,24 @@ Track 02 — AI Risk Manager | AI Buildathon 2026
 ![AUC-ROC](https://img.shields.io/badge/AUC--ROC%3A%200.9187-2B6BE6?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/51%20Tests%20Passing-22863a?style=for-the-badge&logo=checkmarx&logoColor=white)
 
+---
+
+[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-razorpay--risk--dashboard.onrender.com-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://razorpay-risk-dashboard.onrender.com)
+[![Live API](https://img.shields.io/badge/Live%20API-razorpay--risk--api.onrender.com-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://razorpay-risk-api.onrender.com/)
+
+---
+
+[Quick Start](#quick-start) &nbsp;|&nbsp; [Architecture](#architecture) &nbsp;|&nbsp; [API Reference](#api-reference) &nbsp;|&nbsp; [Dashboard](#dashboard) &nbsp;|&nbsp; [Docker Deployment](#docker-deployment)
+
 </div>
 
 ---
 
-## At A Glance
+## Overview
+
+SentinelML is a production-grade fraud detection system that scores transactions in real time, generates explainable decisions with SHAP reason codes, and integrates directly with Razorpay's test-mode API. Every decision is logged to an immutable audit trail and can be exported as a chargeback evidence pack.
+
+The system handles the full fraud detection lifecycle — from transaction ingestion and feature engineering, through ML inference and threshold routing, to merchant webhook delivery and drift monitoring.
 
 | Signal | Value |
 |---|---|
@@ -30,26 +45,15 @@ Track 02 — AI Risk Manager | AI Buildathon 2026
 | **Controls** | Explainable reasons, immutable audit, drift monitoring |
 | **Interfaces** | FastAPI, Streamlit, Razorpay test mode |
 
-<p align="center">
-  <a href="#quick-start">Quick start</a> |
-  <a href="#architecture">Architecture</a> |
-  <a href="#api-reference">API</a> |
-  <a href="#dashboard">Dashboard</a> |
-  <a href="#docker-deployment">Deploy</a>
-</p>
+> **Important:** This project is configured for Razorpay **test mode**. Use test credentials in `.env` and never commit secrets.
 
-## Overview
-
-Razorpay AI Risk Manager is a production-grade fraud detection system that scores transactions in real time, generates explainable decisions with SHAP reason codes, and integrates directly with Razorpay's test-mode API. Every decision is logged to an immutable audit trail and can be exported as a chargeback evidence pack.
-
-The system handles the full fraud detection lifecycle — from transaction ingestion and feature engineering, through ML inference and threshold routing, to merchant webhook delivery and drift monitoring.
-
-> [!IMPORTANT]
-> This project is configured for Razorpay **test mode**. Use test credentials in `.env` and never commit secrets.
+---
 
 ## Architecture
 
 The scoring path keeps low-history entities conservative while giving established entities the full calibrated model path.
+
+### Scoring Pipeline
 
 ```mermaid
 flowchart LR
@@ -122,7 +126,7 @@ flowchart LR
 
 ## Evaluation Metrics
 
-Evaluated on the IEEE-CIS Fraud Detection dataset (118,108 validation transactions)
+Evaluated on the IEEE-CIS Fraud Detection dataset — **118,108 validation transactions**
 
 | Metric | HIGH_PRECISION | BALANCED |
 |---|---|---|
@@ -138,7 +142,7 @@ Evaluated on the IEEE-CIS Fraud Detection dataset (118,108 validation transactio
 
 **Model:** LightGBM 3129 trees, 451 features, isotonic calibration
 
-**Training data:** 472,432 transactions | **Validation data:** 118,108 transactions
+**Training data:** 472,432 transactions &nbsp;|&nbsp; **Validation data:** 118,108 transactions
 
 ---
 
@@ -229,10 +233,13 @@ streamlit run dashboard/app.py
 pytest tests/ -v
 ```
 
-Access points:
-- API documentation: http://localhost:8000/docs
-- Dashboard: http://localhost:8501
-- API health: http://localhost:8000/health
+| Access Point | URL |
+|---|---|
+| API documentation | http://localhost:8000/docs |
+| Dashboard | http://localhost:8501 |
+| API health | http://localhost:8000/health |
+| **Live Dashboard** | https://razorpay-risk-dashboard.onrender.com |
+| **Live API** | https://razorpay-risk-api.onrender.com/ |
 
 ---
 
@@ -240,11 +247,12 @@ Access points:
 
 ### Score a Transaction
 
-```bash
+```
 POST /score
 ```
 
-Request:
+**Request**
+
 ```json
 {
   "TransactionAmt": 250.0,
@@ -260,7 +268,8 @@ Request:
 }
 ```
 
-Response:
+**Response**
+
 ```json
 {
   "transaction_id": "35535090-344",
@@ -284,38 +293,18 @@ Response:
 }
 ```
 
-### Create Razorpay Test Order
+### Additional Endpoints
 
-```bash
+```
 POST /razorpay/create-order?amount_inr=250&merchant_id=merchant_123
-```
-
-### Batch Score from CSV
-
-```bash
 POST /batch
-Content-Type: application/json
-
-[
-  { "TransactionAmt": 250.0, "card1": 9500 },
-  { "TransactionAmt": 1500.0, "card1": 1234 }
-]
+GET  /audit/history?limit=50
+GET  /audit/stats?hours=24
+GET  /health
 ```
 
-### Audit History
+**Health check response**
 
-```bash
-GET /audit/history?limit=50
-GET /audit/stats?hours=24
-```
-
-### Health Check
-
-```bash
-GET /health
-```
-
-Response:
 ```json
 {
   "status": "ok",
@@ -329,7 +318,7 @@ Response:
 
 ## Dashboard
 
-The Streamlit ops panel provides 6 tabs:
+The Streamlit ops panel is live at **https://razorpay-risk-dashboard.onrender.com** and provides 6 tabs:
 
 | Tab | Purpose |
 |---|---|
@@ -344,65 +333,44 @@ The Streamlit ops panel provides 6 tabs:
 
 ## Features
 
-### Core Features
+### Core Capabilities
 
-- **Real-time inference:** Sub-50ms fraud scoring via LightGBM with isotonic calibration
-- **Cold-start handling:** Rule-based fallback for entities with <10 transaction history
-- **Explainability:** TreeSHAP reason codes for every decision
-- **Razorpay integration:** Direct test-mode order creation and webhook delivery
-- **Immutable audit trail:** Append-only JSONL log of all decisions
-- **Drift monitoring:** PSI and KL divergence detection between reference and current windows
+| Feature | Description |
+|---|---|
+| Real-time inference | Sub-50ms fraud scoring via LightGBM with isotonic calibration |
+| Cold-start handling | Rule-based fallback for entities with fewer than 10 transaction history |
+| Explainability | TreeSHAP reason codes for every decision |
+| Razorpay integration | Direct test-mode order creation and webhook delivery |
+| Immutable audit trail | Append-only JSONL log of all decisions |
+| Drift monitoring | PSI and KL divergence detection between reference and current windows |
 
 ### Feature Engineering
 
-Engineered features (17 new + 434 raw = 451 total):
+451 total features (17 engineered + 434 raw):
 
-- **Velocity:** card1_vel_3600s, card1_vel_21600s, card1_vel_86400s
-- **Amount:** log_amount, amount_rounded, amount_gt_500, amount_gt_1000, amt_vs_card_mean
-- **Time:** hour_of_day, day_of_week, is_night, is_weekend
-- **Entity:** card1_freq, card2_freq, addr1_freq, email_match, addr_mismatch
-- **Risk signals:** risky_email_domain, is_cold_start
+| Category | Features |
+|---|---|
+| Velocity | card1_vel_3600s, card1_vel_21600s, card1_vel_86400s |
+| Amount | log_amount, amount_rounded, amount_gt_500, amount_gt_1000, amt_vs_card_mean |
+| Time | hour_of_day, day_of_week, is_night, is_weekend |
+| Entity | card1_freq, card2_freq, addr1_freq, email_match, addr_mismatch |
+| Risk signals | risky_email_domain, is_cold_start |
 
 ---
 
 ## Test Suite
 
-51 tests, 0 failures
+**51 tests, 0 failures**
 
-**tests/test_api.py (26 tests)**
-- Health endpoint (4): status, model version, thresholds, Razorpay connection
-- Scoring (9): schema validation, p_fraud range, latency, error handling
-- Cold-start (3): path routing, rule triggering
-- Threshold routing (2): decision consistency with fraud probability
-- Audit logging (5): stats, history, record creation
-- Batch scoring (3): response format, result counts
+| Test file | Count | Coverage |
+|---|---|---|
+| test_api.py | 26 | Health endpoint, scoring, cold-start routing, threshold routing, audit logging, batch scoring |
+| test_threshold.py | 15 | Boundary conditions, decision routing, cold-start risk adjustments, caps, reason codes |
+| test_audit.py | 10 | Append-only writes, filtering, statistics |
 
-**tests/test_threshold.py (15 tests)**
-- Threshold logic (8): boundary conditions, decision routing
-- Cold-start rules (7): risk adjustments, caps, reason codes
-
-**tests/test_audit.py (10 tests)**
-- Audit logger (10): append-only writes, filtering, statistics
-
-Run tests:
 ```bash
 pytest tests/ -v
 ```
-
----
-
-## Docker Deployment
-
-```bash
-# Build and run API container
-docker build -t razorpay-risk-api .
-docker run -p 8000:8000 --env-file .env razorpay-risk-api
-
-# Run full stack (API + Dashboard)
-docker-compose -f docker/docker-compose.yml up
-```
-
-Base image: Python 3.11-slim
 
 ---
 
@@ -414,7 +382,7 @@ New entities with fewer than 10 historical transactions are scored by a conserva
 |---|---|
 | Default prior | P(Fraud) = 0.45 |
 | Amount exceeds INR 500 | P(Fraud) = max(current, 0.78) |
-| Night-time transaction (22:00-05:00) | P(Fraud) += 0.10; amount limit = INR 350 |
+| Night-time transaction (22:00–05:00) | P(Fraud) += 0.10; amount limit = INR 350 |
 | Risky email domain | P(Fraud) = max(current, 0.85) |
 | Ceiling | P(Fraud) capped at 0.95 |
 
@@ -426,12 +394,12 @@ After 10 transactions, the entity graduates to the ML model path.
 
 The `mlops/drift.py` module computes PSI (Population Stability Index) between a 7-day reference window and a 24-hour recent window.
 
-Thresholds:
-- PSI < 0.1: Stable, no action needed
-- PSI 0.1-0.2: Monitor, watch closely
-- PSI > 0.2: Drift detected, retrain recommended
+| PSI Range | Status | Action |
+|---|---|---|
+| PSI < 0.1 | Stable | No action needed |
+| PSI 0.1 – 0.2 | Monitor | Watch closely |
+| PSI > 0.2 | Drift detected | Retrain recommended |
 
-Formulas:
 ```
 PSI = sum((actual_pct - expected_pct) * ln(actual_pct / expected_pct))
 KL_divergence = sum(p * ln(p / q))
@@ -453,16 +421,19 @@ Training pipeline uses the IEEE-CIS Fraud Detection dataset:
 | Split method | Time-based (no shuffle) |
 | Cold-start transactions | 28,052 (4.8%) |
 
-Training configuration:
-- Objective: binary classification
-- Learning rate: 0.01
-- Num leaves: 31
-- Max depth: 6
-- Min child samples: 100
-- Feature fraction: 0.7
-- Bagging fraction: 0.7
-- Scale pos weight: 27.5
-- Best iteration: 3129 (early stopping)
+**Training configuration**
+
+| Parameter | Value |
+|---|---|
+| Objective | Binary classification |
+| Learning rate | 0.01 |
+| Num leaves | 31 |
+| Max depth | 6 |
+| Min child samples | 100 |
+| Feature fraction | 0.7 |
+| Bagging fraction | 0.7 |
+| Scale pos weight | 27.5 |
+| Best iteration | 3129 (early stopping) |
 
 ---
 
@@ -481,6 +452,21 @@ Training configuration:
 | Testing | pytest 9.1, pandas 2.1 |
 | Containerization | Docker, docker-compose |
 | Language | Python 3.12 (development), Python 3.11 (production container) |
+
+---
+
+## Docker Deployment
+
+```bash
+# Build and run API container
+docker build -t razorpay-risk-api .
+docker run -p 8000:8000 --env-file .env razorpay-risk-api
+
+# Run full stack (API + Dashboard)
+docker-compose -f docker/docker-compose.yml up
+```
+
+Base image: Python 3.11-slim
 
 ---
 
@@ -506,7 +492,7 @@ Never commit `.env` to version control. It is listed in `.gitignore`.
 | Component | Status | Notes |
 |---|---|---|
 | LightGBM training pipeline | Complete | IEEE-CIS, 451 features, isotonic calibration |
-| Cold-start rule engine | Complete | Conservative fallback for <10 txn entities |
+| Cold-start rule engine | Complete | Conservative fallback for fewer than 10 txn entities |
 | Dynamic threshold routing | Complete | APPROVE, STEP_UP_2FA, DECLINE decisions |
 | FastAPI inference server | Complete | /score, /batch, /health, /audit endpoints |
 | Razorpay test-mode integration | Complete | Real orders via rzp_test_ keys |
@@ -527,7 +513,7 @@ Never commit `.env` to version control. It is listed in `.gitignore`.
 
 ## Author
 
-Ishan Gain
+**Ishan Gain**
 
 AI Buildathon 2026 — Track 02: AI Risk Manager
 
@@ -535,4 +521,8 @@ GitHub: [IshanGain](https://github.com/IshanGain)
 
 ---
 
+<div align="center">
+
 Built for Razorpay AI Buildathon 2026
+
+</div>
