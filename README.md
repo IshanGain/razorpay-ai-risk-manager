@@ -8,8 +8,6 @@
 
 **End-to-End MLOps Pipeline for Low-Latency Transaction Scoring and Continuous Model Monitoring**
 
-Real-time fraud detection with explainable decisions, cold-start handling, and full Razorpay test-mode integration.
-
 <sub>Track 02 — AI Risk Manager &nbsp;·&nbsp; AI Buildathon 2026</sub>
 
 <br />
