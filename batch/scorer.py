@@ -3,13 +3,15 @@ Batch CSV Scorer
 Upload a CSV of transactions, get back scored results with SHAP reasons
 """
 
+import os
 import pandas as pd
 import numpy as np
 import requests
 import json
 from typing import List
 
-API_BASE = "http://127.0.0.1:8000"
+# Dynamically load API_BASE from environment variables, removing accidental trailing slashes
+API_BASE = os.getenv("API_BASE", "http://127.0.0.1:8000").rstrip("/")
 
 REQUIRED_COLS = ["TransactionAmt"]
 
@@ -93,7 +95,7 @@ def score_batch_csv(df: pd.DataFrame,
             r = requests.post(
                 f"{API_BASE}/score",
                 json=payload,
-                timeout=15
+                timeout=60  # Increased to 60 seconds for Render cold starts
             )
             data = r.json()
             results.append({
